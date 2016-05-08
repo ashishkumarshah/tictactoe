@@ -1,0 +1,36 @@
+<h1>Tic Tac Toe</h1>
+
+<!-- ko with: gameEngine -->
+<div data-bind="visible: isGameOver">
+    <div>Winner is</div>
+    <div><span data-bind="text:isGameOver"></span></div>
+</div>
+<div>
+    <!-- ko with: ticTacToeGame -->
+    <!-- ko with: gameState -->
+    <table>
+        <tbody data-bind="foreach:gameBoard">
+            <tr data-bind="foreach: $data">
+                <td><button data-bind="text:value, click: function() {$parents[4].handlePlayerClick($data);}"></button></td>
+            </tr>
+        </tbody>
+    </table>
+    <!--/ko -->
+    <!--/ko -->
+</div>
+<h2>Move History</h2>
+<div>
+    <table>
+        <thead>
+            <tr><th>X Position</th><th>Y Position</th><th>Player</th></tr>
+        </thead>
+        <tbody data-bind="foreach: getMoveHistory()">
+            <tr>
+                <td data-bind="text: x"></td>
+                <td data-bind="text: y"></td>
+                <td data-bind="text: playerSymbol"></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<!-- /ko -->
