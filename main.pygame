@@ -1,0 +1,131 @@
+import pygame
+import sys
+import logging
+
+# Configure the logger
+logging.basicConfig(
+    filename="tic_tac_toe.log",  # Log file name
+    level=logging.DEBUG,        # Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
+
+logger = logging.getLogger()
+
+def main():
+    # Log the start of the game
+    logger.info("Starting Tic Tac Toe")
+
+    # Initialize Pygame
+    pygame.init()
+    logger.debug("Pygame initialized")
+
+    # Initialize Joystick
+    pygame.joystick.init()
+    joystick = None
+    if pygame.joystick.get_count() > 0:
+        joystick = pygame.joystick.Joystick(0)
+        joystick.init()
+        logger.info(f"Joystick initialized: {joystick.get_name()}")
+    else:
+        logger.warning("No joystick connected")
+
+    # Get screen size dynamically
+    SCREEN_WIDTH = pygame.display.Info().current_w
+    SCREEN_HEIGHT = pygame.display.Info().current_h
+    SQUARE_SIZE = min(SCREEN_WIDTH, SCREEN_HEIGHT) // 2
+
+    # Set up the display
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    pygame.display.set_caption("Tic Tac Toe")
+    logger.debug("Display initialized")
+
+    # Game variables
+    grid_size = 3
+    cell_size = SQUARE_SIZE // grid_size
+
+    # Calculate offsets for centering the grid
+    grid_x_offset = (SCREEN_WIDTH - SQUARE_SIZE) // 2
+    grid_y_offset = (SCREEN_HEIGHT - SQUARE_SIZE) // 2
+
+    selected_row, selected_col = 0, 0  # Start highlighting the top-left cell
+
+    # Main game loop
+    running = True
+    while running:
+        for event in pygame.event.get():
+            logger.info("Event " + event.type)
+            if event.type == pygame.QUIT:
+                logger.info("Quit event detected")
+                running = False
+
+            # Handle joystick button press
+            elif event.type == pygame.JOYBUTTONDOWN:
+                logger.debug(f"Joystick button {event.button} pressed")
+                if event.button == 0:  # Replace '0' with the correct button index for "Select"
+                    logger.info("Select button pressed, quitting game")
+                    running = False
+
+            # Handle joystick axis movement
+            elif event.type == pygame.JOYAXISMOTION:
+                if abs(event.value) > 0.5:  # Threshold to avoid small drifts
+                    if event.axis == 0:  # Horizontal axis
+                        selected_col += 1 if event.value > 0 else -1
+                    elif event.axis == 1:  # Vertical axis
+                        selected_row += 1 if event.value > 0 else -1
+
+                    # Clamp the selection to stay within bounds
+                    selected_row = max(0, min(grid_size - 1, selected_row))
+                    selected_col = max(0, min(grid_size - 1, selected_col))
+                    logger.debug(f"Selected cell: ({selected_row}, {selected_col})")
+
+        # Fill the screen with white
+        screen.fill((255, 255, 255))
+
+        # Draw the grid lines
+        line_color = (0, 0, 0)  # Black color for the lines
+        line_width = 3
+
+        # Vertical lines
+        for i in range(1, grid_size):
+            x = grid_x_offset + i * cell_size
+            pygame.draw.line(screen, line_color, (x, grid_y_offset), (x, grid_y_offset + SQUARE_SIZE), line_width)
+
+        # Horizontal lines
+        for i in range(1, grid_size):
+            y = grid_y_offset + i * cell_size
+            pygame.draw.line(screen, line_color, (grid_x_offset, y), (grid_x_offset + SQUARE_SIZE, y), line_width)
+
+        # Highlight the selected cell
+        highlight_color = (200, 200, 255)  # Light blue
+        cell_x = grid_x_offset + selected_col * cell_size
+        cell_y = grid_y_offset + selected_row * cell_size
+        pygame.draw.rect(
+            screen,
+            highlight_color,
+            (cell_x, cell_y, cell_size, cell_size),
+        )
+
+        # Draw a border around the highlighted cell
+        pygame.draw.rect(
+            screen,
+            (0, 0, 255),  # Blue
+            (cell_x, cell_y, cell_size, cell_size),
+            line_width,
+        )
+
+        # Update the display
+        pygame.display.flip()
+
+    # Quit Pygame and joystick
+    if joystick:
+        joystick.quit()
+    pygame.quit()
+    sys.exit()
+
+
+# Call the main function
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as e:
+        logger.exception("An unexpected error occurred")

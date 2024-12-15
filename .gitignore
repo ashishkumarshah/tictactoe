@@ -3,6 +3,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# IDE
+.idea/
+
+# logs
+tic_tac_toe.log
+
 # C extensions
 *.so
 
